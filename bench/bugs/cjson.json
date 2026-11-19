@@ -1,0 +1,20 @@
+{
+  "strip": ["README.md", "CHANGELOG.md", "CONTRIBUTORS.md"],
+  "mutations": [
+    {"id": "cjson-01", "file": "cJSON.c",
+     "find": "return (fabs(a - b) <= maxVal * DBL_EPSILON);",
+     "replace": "return (fabs(a - b) < maxVal * DBL_EPSILON);",
+     "category": "bug",
+     "note": "comparaison stricte : deux nombres égaux (notamment 0 et 0) ne sont plus jugés égaux"},
+    {"id": "cjson-02", "file": "cJSON.c",
+     "find": "return (item->type & 0xFF) == cJSON_Number;",
+     "replace": "return item->type == cJSON_Number;",
+     "category": "bug",
+     "note": "le masque 0xFF est retiré : un nombre portant un drapeau (ex. IsReference) n'est plus reconnu"},
+    {"id": "cjson-03", "file": "cJSON.c",
+     "find": "while ((current_child != NULL) && (index > 0))",
+     "replace": "while ((current_child != NULL) && (index > 1))",
+     "category": "bug",
+     "note": "décalage d'un cran : get_array_item renvoie l'élément précédent pour index >= 1"}
+  ]
+}

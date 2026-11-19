@@ -1,0 +1,20 @@
+{
+  "strip": ["README.md"],
+  "mutations": [
+    {"id": "tiny2d-01", "file": "src/input.rs",
+     "find": "self.pressed.contains(&key)",
+     "replace": "self.down.contains(&key)",
+     "category": "bug",
+     "note": "key_pressed lit l'ensemble « down » : vrai à chaque frame tant que la touche est tenue, plus seulement à l'appui"},
+    {"id": "tiny2d-02", "file": "src/input.rs",
+     "find": "        self.released.clear();\n",
+     "replace": "",
+     "category": "bug",
+     "note": "end_frame ne vide plus « released » : key_released reste vrai indéfiniment"},
+    {"id": "tiny2d-03", "file": "src/time.rs",
+     "find": ".as_secs_f64()",
+     "replace": ".as_millis() as f64",
+     "category": "bug",
+     "note": "unité incohérente : tick_simple compte en millisecondes alors que dt est en secondes"}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "strip": ["README.md", "FAQ.md", "REFERENCE.md", "EDITOR.md", "CHANGELOG.md", "CLAUDE.md", "AGENTS.md"],
+  "mutations": [
+    {"id": "littlejs-01", "file": "src/engineMath.js",
+     "find": "function mod(dividend, divisor=1) { return ((dividend % divisor) + divisor) % divisor; }",
+     "replace": "function mod(dividend, divisor=1) { return dividend % divisor; }",
+     "category": "bug",
+     "note": "mod ne gère plus les dividendes négatifs : le résultat peut être négatif"},
+    {"id": "littlejs-02", "file": "src/engineUtilities.js",
+     "find": "(t%60<10?'0':'')",
+     "replace": "(t%60<=10?'0':'')",
+     "category": "bug",
+     "note": "borne <= au lieu de < : 10 secondes s'affiche « 0:010 »"},
+    {"id": "littlejs-03", "file": "src/engineMath.js",
+     "find": "{ return (valueB-=valueA) ? clamp((value-valueA)/valueB) : 0; }",
+     "replace": "{ return (valueB-=valueA) ? (value-valueA)/valueB : 0; }",
+     "category": "bug",
+     "note": "le clamp est retiré : percent dépasse 0-1 alors que la doc promet une valeur bornée"}
+  ]
+}

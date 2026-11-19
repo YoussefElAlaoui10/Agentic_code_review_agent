@@ -28,8 +28,14 @@ Points durs du projet :
 - **Tout est en français** : documentation, README, commentaires, docstrings, messages de commit, titres et descriptions de PR, messages de la CLI, prompts système des agents, rapports.
 - **Identifiants de code en anglais** (variables, fonctions, classes, clés JSON : `severity`, `category`, `justification`, `confidence`). Ne pas traduire les clés du schéma JSON.
 - Les prompts envoyés aux LLM sont en français, mais la sortie JSON garde les clés en anglais.
-- Python ≥ 3.11, typage strict (`mypy --strict` ou `pyright`), `ruff` pour lint + format, `pytest` + `pytest-asyncio`.
-- Modèles de données avec **Pydantic v2**. Aucune sortie de LLM n'est utilisée sans validation de schéma.
+- Aucune sortie de LLM n'est utilisée sans validation de schéma.
+
+### État réel du dépôt (2026-11-19) — à lire avant de coder
+Youssef a poussé sur `main` une implémentation complète de l'agent (paquet **`src/prreview/`**, commit `a0d4327`). Elle **fait foi** pour le code de l'agent ; les règles ci-dessous s'adaptent à elle, pas l'inverse :
+- **Python ≥ 3.10, bibliothèque standard uniquement** (aucune dépendance, `dependencies = []`), tests avec `unittest` (`make test`, 49 tests). Ne pas ajouter de dépendance (Pydantic, typer…) sans accord de Youssef.
+- Le code de `src/prreview/`, son README et son rapport (`report/rapport.md`) sont **en anglais**. Pour ne pas réécrire son travail : le code existant reste en anglais ; **nos ajouts** (`bench/`, environnement de test, `docs/rapport/`) sont en français. Harmonisation de la langue à décider avec lui.
+- Le nom de paquet est `prreview` (et non `revue`) ; la CLI est `python -m prreview ...`.
+- Les cibles de ce que l'on ajoute : lint (`ruff`) et typage dès que `pyproject.toml` le permettra ; pour l'instant, vérifier avec `make test`.
 
 ## 3. Workflow Git (OBLIGATOIRE)
 
@@ -109,32 +115,29 @@ Ne **jamais** écraser, réécrire ou supprimer le travail d'un collègue, et ne
 - Rebaser régulièrement sa branche sur `main` pour réduire les conflits.
 - Ne pas modifier les mêmes fichiers qu'un collègue sans l'avoir signalé ; préférer de petits changements isolés.
 
-## 5. Architecture cible
+## 5. Architecture
+
+> L'agent existe déjà (Youssef, `main`). Ce qui suit décrit l'état réel ; la première version « cible » de ce fichier (`src/revue/`, Pydantic, typer) est abandonnée.
 
 ```
 code-review-agent/
 ├── CLAUDE.md
-├── pyproject.toml
-├── .env.example
-├── src/revue/
-│   ├── cli.py                 # point d'entrée (typer) : `revue pr <owner/repo> <n>`
-│   ├── mcp_server.py          # (optionnel) serveur MCP exposant la revue
-│   ├── github_client.py       # PyGithub / httpx : fichiers de PR, patchs, pagination
-│   ├── diff_splitter.py       # découpage du diff par fichier et par hunk
-│   ├── schemas.py             # Finding, ReviewResult, JudgeVerdict (Pydantic)
-│   ├── agents/
-│   │   ├── reviewer.py        # un reviewer par fichier (boucle d'agent)
-│   │   ├── judge.py           # fusion, déduplication, filtre de confiance
-│   │   └── prompts/           # prompts système en français
-│   ├── orchestrator.py        # asyncio.gather + Semaphore(3), timeouts, retries
-│   └── publisher.py           # sortie : JSON, Markdown, (option) commentaires GitHub
+├── pyproject.toml / Makefile / requirements.txt / .env.example   # (Youssef)
+├── src/prreview/              # (Youssef) agent de revue, bibliothèque standard seule
+│   ├── cli.py                 # `python -m prreview review|speedup|quality|serve-mcp`
+│   ├── reviewer.py            # reviewers spécialisés par rôle, boucle d'agent + outils (tools.py)
+│   ├── judge.py               # dédoublonnage, corroboration, filtre de confiance
+│   ├── orchestrator.py        # fan-out parallèle borné par un sémaphore
+│   ├── diffparse.py, ghclient.py, llm.py (transport --mock inclus), models.py,
+│   │   render.py, rules.py, mcp_server.py, bench.py (speedup + quality)
+├── samples/, results/, report/rapport.md, scripts/prove_concurrency.py   # (Youssef)
+├── tests/test_prreview.py     # 49 tests unittest
 ├── bench/
 │   ├── targets.json           # cibles : dépôt, licence, commit figé
 │   ├── setup_env.py           # clone les cibles dans environment/ (ignoré par Git)
-│   ├── inject_bugs.py         # injection déterministe de bugs / suppression de doc
-│   ├── dataset/               # PR étiquetées (JSONL) : repo, n, constats attendus
-│   ├── run_bench.py           # précision / rappel / F1
-│   └── README.md
+│   ├── bugs/<cible>.json      # mutations déterministes + documentation à supprimer
+│   ├── make_case.py           # génère environment/cases/<cible>.{diff,labels.json}
+│   └── demo_pr.labels.json    # (Youssef) étiquettes de la PR de démonstration
 ├── tests/
 └── docs/
     ├── rapport/               # rapport LaTeX continu (main.tex + sections/)
@@ -220,12 +223,17 @@ Construire un **environnement dans lequel on peut tester les capacités des agen
 ## 8. Commandes utiles
 
 ```bash
-uv sync                                  # ou pip install -e ".[dev]"
-ruff check . && ruff format .
-mypy src
-pytest -q
-python -m revue.cli pr dask/dask 12345 --max-parallel 3 --min-confidence 0.6 --format json
-python bench/run_bench.py --dataset bench/dataset/prs.jsonl
+make test                                # 49 tests (unittest, sans dépendance)
+make demo                                # revue hors ligne de samples/demo_pr.diff
+PYTHONPATH=src python -m prreview review <owner/repo#N | fichier.diff> [--mock] [-c 8]
+
+# Environnement de test local (nos ajouts)
+python bench/setup_env.py                # clone les cibles (commit figé, tag « sain »)
+python bench/make_case.py                # injecte les bugs -> environment/cases/*.{diff,labels.json}
+PYTHONPATH=src python -m prreview quality --mock --out-dir environment/results \
+  --labels environment/cases/cjson.labels.json \
+  --labels environment/cases/littlejs.labels.json \
+  --labels environment/cases/tiny2d.labels.json
 ```
 
 ## 9. Façon de travailler (consignes pour Claude)
