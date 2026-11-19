@@ -1,0 +1,43 @@
+{
+  "target": "demo-pr (synthetic ingestion worker change)",
+  "diff": "../samples/demo_pr.diff",
+  "annotator": "project authors",
+  "protocol": "Two reviewers labelled independently, then reconciled. A defect is labelled only if a maintainer would plausibly request a change for it. Line = the line a review comment should attach to; matching tolerance is +/-3 lines.",
+  "known_limits": "Two entries (fetcher.py:36, cache.py:27) are semantic defects that no pattern rule can detect. They are kept in the ground truth on purpose, so recall reflects what the reviewer actually misses instead of being defined by what the rules can find.",
+  "labels": [
+    {"path": "app/fetcher.py", "line": 10, "category": "bug",
+     "note": "mutable default argument seen=[] is shared across all calls"},
+    {"path": "app/fetcher.py", "line": 14, "category": "perf",
+     "note": "time.sleep blocks the event loop inside a coroutine"},
+    {"path": "app/fetcher.py", "line": 15, "category": "perf",
+     "note": "blocking requests.get inside a coroutine serialises the fan-out"},
+    {"path": "app/fetcher.py", "line": 24, "category": "perf",
+     "note": "blocking requests.get inside fetch_one coroutine"},
+    {"path": "app/fetcher.py", "line": 26, "category": "bug",
+     "note": "bare except hides every error including KeyboardInterrupt"},
+    {"path": "app/fetcher.py", "line": 30, "category": "test",
+     "note": "parse_rule evaluates user input and has no test at all"},
+    {"path": "app/fetcher.py", "line": 32, "category": "bug",
+     "note": "eval on a user-supplied expression is arbitrary code execution"},
+    {"path": "app/fetcher.py", "line": 36, "category": "bug",
+     "note": "SEMANTIC: summarise indexes payloads[0] and raises IndexError on an empty list"},
+
+    {"path": "app/cache.py", "line": 14, "category": "bug",
+     "note": "lock acquired without try/finally; an exception in _evict_if_needed deadlocks every other thread"},
+    {"path": "app/cache.py", "line": 20, "category": "style",
+     "note": "== None should be is None"},
+    {"path": "app/cache.py", "line": 25, "category": "bug",
+     "note": "assert used for runtime invariant is removed under python -O"},
+    {"path": "app/cache.py", "line": 27, "category": "bug",
+     "note": "SEMANTIC: sorted(self._store)[0] evicts the lexicographically smallest key, not the oldest entry, so the cache evicts the wrong item"},
+
+    {"path": "app/exporter.py", "line": 7, "category": "test",
+     "note": "export_csv is new and untested"},
+    {"path": "app/exporter.py", "line": 8, "category": "bug",
+     "note": "file opened without a context manager leaks the handle when write raises"},
+    {"path": "app/exporter.py", "line": 12, "category": "style",
+     "note": "print in library code should be logging"},
+    {"path": "app/exporter.py", "line": 16, "category": "bug",
+     "note": "string-built command with shell=True allows shell injection via destination"}
+  ]
+}

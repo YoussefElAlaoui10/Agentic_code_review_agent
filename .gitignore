@@ -4,11 +4,19 @@ environment/
 
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
 .venv/
+venv/
+*.egg-info/
+build/
+dist/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 
 # Secrets
 .env
+
+# Generated measurement artefacts are reproducible with `make bench`;
+# the ones quoted in the report are committed under results/ on purpose.
+results/*.tmp

@@ -1,0 +1,823 @@
+{
+  "target": "samples/demo_pr.diff (local diff)",
+  "mode": "parallel",
+  "model": "mock-reviewer",
+  "concurrency": 8,
+  "wall_clock_s": 0.6786,
+  "files_reviewed": 4,
+  "judge_stats": {
+    "raw": 32,
+    "after_dedupe": 18,
+    "after_filter": 18,
+    "published": 18,
+    "dropped_low_confidence": 0,
+    "dropped_over_cap": 0,
+    "merged_groups": 10,
+    "corroborated": 9,
+    "by_category": {
+      "bug": 7,
+      "perf": 2,
+      "test": 9
+    },
+    "by_severity": {
+      "high": 6,
+      "medium": 12
+    },
+    "failed_reviewers": [],
+    "llm_polished": 0,
+    "tasks": 12,
+    "max_observed_overlap": 8,
+    "sum_task_time_s": 4.0171
+  },
+  "findings": [
+    {
+      "path": "app/exporter.py",
+      "line": 16,
+      "severity": "high",
+      "category": "bug",
+      "title": "`shell=True` enables shell injection",
+      "justification": "With shell=True the command string is interpreted by the shell, so any interpolated value can inject further commands.",
+      "confidence": 0.99,
+      "suggestion": "Pass a list of arguments and leave shell=False.",
+      "reviewer": "correctness",
+      "agreed_by": [
+        "tests"
+      ]
+    },
+    {
+      "path": "app/fetcher.py",
+      "line": 10,
+      "severity": "high",
+      "category": "bug",
+      "title": "Mutable default argument is shared across calls",
+      "justification": "Default arguments are evaluated once at function definition, so the same list/dict is reused by every call and accumulates state.",
+      "confidence": 0.99,
+      "suggestion": "Default to `None` and build the container inside the function.",
+      "reviewer": "correctness",
+      "agreed_by": [
+        "performance",
+        "tests"
+      ]
+    },
+    {
+      "path": "app/fetcher.py",
+      "line": 24,
+      "severity": "high",
+      "category": "perf",
+      "title": "Synchronous HTTP call inside a coroutine blocks the event loop",
+      "justification": "`requests` is blocking; called from a coroutine it serialises all concurrent tasks on the same loop.",
+      "confidence": 0.99,
+      "suggestion": "Use an async client, or wrap the call in `asyncio.to_thread`.",
+      "reviewer": "performance",
+      "agreed_by": [
+        "tests"
+      ]
+    },
+    {
+      "path": "app/fetcher.py",
+      "line": 14,
+      "severity": "high",
+      "category": "perf",
+      "title": "Blocking `time.sleep` inside a coroutine stalls the event loop",
+      "justification": "time.sleep blocks the thread running the loop, so every other task on that loop is frozen for the duration: the concurrency is fake.",
+      "confidence": 0.95,
+      "suggestion": "Use `await asyncio.sleep(...)`.",
+      "reviewer": "performance",
+      "agreed_by": []
+    },
+    {
+      "path": "app/fetcher.py",
+      "line": 32,
+      "severity": "high",
+      "category": "bug",
+      "title": "`eval`/`exec` on runtime data is a code-execution risk",
+      "justification": "If any part of the argument comes from user input, request data or a file, this executes arbitrary code in the process.",
+      "confidence": 0.886,
+      "suggestion": "Use `ast.literal_eval`, `json.loads`, or an explicit dispatch dict.",
+      "reviewer": "correctness",
+      "agreed_by": []
+    },
+    {
+      "path": "app/cache.py",
+      "line": 14,
+      "severity": "high",
+      "category": "bug",
+      "title": "Lock acquired without a guaranteed release",
+      "justification": "If the guarded block raises, `.release()` is never reached and every other thread blocks on that lock forever: a deadlock.",
+      "confidence": 0.778,
+      "suggestion": "Use the lock as a context manager (`with lock:`) or try/finally.",
+      "reviewer": "correctness",
+      "agreed_by": []
+    },
+    {
+      "path": "app/fetcher.py",
+      "line": 26,
+      "severity": "medium",
+      "category": "bug",
+      "title": "Bare `except:` swallows every exception",
+      "justification": "A bare except also catches KeyboardInterrupt and SystemExit, so the process stops being interruptible and real errors are hidden.",
+      "confidence": 0.929,
+      "suggestion": "Catch the specific exception, or `except Exception:` at minimum.",
+      "reviewer": "correctness",
+      "agreed_by": []
+    },
+    {
+      "path": "app/cache.py",
+      "line": 13,
+      "severity": "medium",
+      "category": "test",
+      "title": "New public function `put` has no test in this change",
+      "justification": "`put` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+      "confidence": 0.802,
+      "suggestion": "Add a unit test covering `put`'s expected result and one edge case.",
+      "reviewer": "tests",
+      "agreed_by": [
+        "correctness",
+        "performance"
+      ]
+    },
+    {
+      "path": "app/exporter.py",
+      "line": 7,
+      "severity": "medium",
+      "category": "test",
+      "title": "New public function `export_csv` has no test in this change",
+      "justification": "`export_csv` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+      "confidence": 0.802,
+      "suggestion": "Add a unit test covering `export_csv`'s expected result and one edge case.",
+      "reviewer": "tests",
+      "agreed_by": [
+        "correctness",
+        "performance"
+      ]
+    },
+    {
+      "path": "app/exporter.py",
+      "line": 14,
+      "severity": "medium",
+      "category": "test",
+      "title": "New public function `archive` has no test in this change",
+      "justification": "`archive` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+      "confidence": 0.802,
+      "suggestion": "Add a unit test covering `archive`'s expected result and one edge case.",
+      "reviewer": "tests",
+      "agreed_by": [
+        "correctness",
+        "performance"
+      ]
+    },
+    {
+      "path": "app/exporter.py",
+      "line": 8,
+      "severity": "medium",
+      "category": "bug",
+      "title": "File opened without a context manager may leak the handle",
+      "justification": "Without `with`, an exception before `.close()` leaves the descriptor open until the garbage collector runs.",
+      "confidence": 0.768,
+      "suggestion": "Wrap it in `with open(...) as fh:`.",
+      "reviewer": "correctness",
+      "agreed_by": [
+        "tests"
+      ]
+    },
+    {
+      "path": "app/fetcher.py",
+      "line": 10,
+      "severity": "medium",
+      "category": "test",
+      "title": "New public function `fetch_feeds` has no test in this change",
+      "justification": "`fetch_feeds` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+      "confidence": 0.682,
+      "suggestion": "Add a unit test covering `fetch_feeds`'s expected result and one edge case.",
+      "reviewer": "tests",
+      "agreed_by": [
+        "correctness"
+      ]
+    },
+    {
+      "path": "app/fetcher.py",
+      "line": 30,
+      "severity": "medium",
+      "category": "test",
+      "title": "New public function `parse_rule` has no test in this change",
+      "justification": "`parse_rule` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+      "confidence": 0.682,
+      "suggestion": "Add a unit test covering `parse_rule`'s expected result and one edge case.",
+      "reviewer": "tests",
+      "agreed_by": [
+        "performance"
+      ]
+    },
+    {
+      "path": "app/cache.py",
+      "line": 25,
+      "severity": "medium",
+      "category": "bug",
+      "title": "`assert` used for runtime validation is stripped under -O",
+      "justification": "Running Python with -O removes assert statements entirely, so this check silently disappears in optimised deployments.",
+      "confidence": 0.594,
+      "suggestion": "Raise an explicit exception instead.",
+      "reviewer": "correctness",
+      "agreed_by": []
+    },
+    {
+      "path": "app/cache.py",
+      "line": 19,
+      "severity": "medium",
+      "category": "test",
+      "title": "New public function `get` has no test in this change",
+      "justification": "`get` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+      "confidence": 0.562,
+      "suggestion": "Add a unit test covering `get`'s expected result and one edge case.",
+      "reviewer": "tests",
+      "agreed_by": []
+    },
+    {
+      "path": "app/cache.py",
+      "line": 30,
+      "severity": "medium",
+      "category": "test",
+      "title": "New public function `warm` has no test in this change",
+      "justification": "`warm` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+      "confidence": 0.562,
+      "suggestion": "Add a unit test covering `warm`'s expected result and one edge case.",
+      "reviewer": "tests",
+      "agreed_by": []
+    },
+    {
+      "path": "app/fetcher.py",
+      "line": 22,
+      "severity": "medium",
+      "category": "test",
+      "title": "New public function `fetch_one` has no test in this change",
+      "justification": "`fetch_one` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+      "confidence": 0.562,
+      "suggestion": "Add a unit test covering `fetch_one`'s expected result and one edge case.",
+      "reviewer": "tests",
+      "agreed_by": []
+    },
+    {
+      "path": "app/fetcher.py",
+      "line": 35,
+      "severity": "medium",
+      "category": "test",
+      "title": "New public function `summarise` has no test in this change",
+      "justification": "`summarise` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+      "confidence": 0.562,
+      "suggestion": "Add a unit test covering `summarise`'s expected result and one edge case.",
+      "reviewer": "tests",
+      "agreed_by": []
+    }
+  ],
+  "results": [
+    {
+      "path": "app/fetcher.py",
+      "reviewer": "correctness",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.2888,
+      "prompt_tokens": 660,
+      "completion_tokens": 419,
+      "error": null,
+      "findings": [
+        {
+          "path": "app/fetcher.py",
+          "line": 10,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `fetch_feeds` has no test in this change",
+          "justification": "`fetch_feeds` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.312,
+          "suggestion": "Add a unit test covering `fetch_feeds`'s expected result and one edge case.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 10,
+          "severity": "high",
+          "category": "bug",
+          "title": "Mutable default argument is shared across calls",
+          "justification": "Default arguments are evaluated once at function definition, so the same list/dict is reused by every call and accumulates state.",
+          "confidence": 0.972,
+          "suggestion": "Default to `None` and build the container inside the function.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 26,
+          "severity": "medium",
+          "category": "bug",
+          "title": "Bare `except:` swallows every exception",
+          "justification": "A bare except also catches KeyboardInterrupt and SystemExit, so the process stops being interruptible and real errors are hidden.",
+          "confidence": 0.929,
+          "suggestion": "Catch the specific exception, or `except Exception:` at minimum.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 32,
+          "severity": "high",
+          "category": "bug",
+          "title": "`eval`/`exec` on runtime data is a code-execution risk",
+          "justification": "If any part of the argument comes from user input, request data or a file, this executes arbitrary code in the process.",
+          "confidence": 0.886,
+          "suggestion": "Use `ast.literal_eval`, `json.loads`, or an explicit dispatch dict.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        }
+      ]
+    },
+    {
+      "path": "app/fetcher.py",
+      "reviewer": "performance",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.412,
+      "prompt_tokens": 660,
+      "completion_tokens": 506,
+      "error": null,
+      "findings": [
+        {
+          "path": "app/fetcher.py",
+          "line": 10,
+          "severity": "high",
+          "category": "bug",
+          "title": "Mutable default argument is shared across calls",
+          "justification": "Default arguments are evaluated once at function definition, so the same list/dict is reused by every call and accumulates state.",
+          "confidence": 0.54,
+          "suggestion": "Default to `None` and build the container inside the function.",
+          "reviewer": "performance",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 14,
+          "severity": "high",
+          "category": "perf",
+          "title": "Blocking `time.sleep` inside a coroutine stalls the event loop",
+          "justification": "time.sleep blocks the thread running the loop, so every other task on that loop is frozen for the duration: the concurrency is fake.",
+          "confidence": 0.95,
+          "suggestion": "Use `await asyncio.sleep(...)`.",
+          "reviewer": "performance",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 15,
+          "severity": "high",
+          "category": "perf",
+          "title": "Synchronous HTTP call inside a coroutine blocks the event loop",
+          "justification": "`requests` is blocking; called from a coroutine it serialises all concurrent tasks on the same loop.",
+          "confidence": 0.918,
+          "suggestion": "Use an async client, or wrap the call in `asyncio.to_thread`.",
+          "reviewer": "performance",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 24,
+          "severity": "high",
+          "category": "perf",
+          "title": "Synchronous HTTP call inside a coroutine blocks the event loop",
+          "justification": "`requests` is blocking; called from a coroutine it serialises all concurrent tasks on the same loop.",
+          "confidence": 0.918,
+          "suggestion": "Use an async client, or wrap the call in `asyncio.to_thread`.",
+          "reviewer": "performance",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 30,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `parse_rule` has no test in this change",
+          "justification": "`parse_rule` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.312,
+          "suggestion": "Add a unit test covering `parse_rule`'s expected result and one edge case.",
+          "reviewer": "performance",
+          "agreed_by": []
+        }
+      ]
+    },
+    {
+      "path": "app/fetcher.py",
+      "reviewer": "tests",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.4533,
+      "prompt_tokens": 660,
+      "completion_tokens": 626,
+      "error": null,
+      "findings": [
+        {
+          "path": "app/fetcher.py",
+          "line": 10,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `fetch_feeds` has no test in this change",
+          "justification": "`fetch_feeds` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.562,
+          "suggestion": "Add a unit test covering `fetch_feeds`'s expected result and one edge case.",
+          "reviewer": "tests",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 10,
+          "severity": "high",
+          "category": "bug",
+          "title": "Mutable default argument is shared across calls",
+          "justification": "Default arguments are evaluated once at function definition, so the same list/dict is reused by every call and accumulates state.",
+          "confidence": 0.54,
+          "suggestion": "Default to `None` and build the container inside the function.",
+          "reviewer": "tests",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 22,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `fetch_one` has no test in this change",
+          "justification": "`fetch_one` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.562,
+          "suggestion": "Add a unit test covering `fetch_one`'s expected result and one edge case.",
+          "reviewer": "tests",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 24,
+          "severity": "high",
+          "category": "perf",
+          "title": "Synchronous HTTP call inside a coroutine blocks the event loop",
+          "justification": "`requests` is blocking; called from a coroutine it serialises all concurrent tasks on the same loop.",
+          "confidence": 0.51,
+          "suggestion": "Use an async client, or wrap the call in `asyncio.to_thread`.",
+          "reviewer": "tests",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 30,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `parse_rule` has no test in this change",
+          "justification": "`parse_rule` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.562,
+          "suggestion": "Add a unit test covering `parse_rule`'s expected result and one edge case.",
+          "reviewer": "tests",
+          "agreed_by": []
+        },
+        {
+          "path": "app/fetcher.py",
+          "line": 35,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `summarise` has no test in this change",
+          "justification": "`summarise` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.562,
+          "suggestion": "Add a unit test covering `summarise`'s expected result and one edge case.",
+          "reviewer": "tests",
+          "agreed_by": []
+        }
+      ]
+    },
+    {
+      "path": "app/cache.py",
+      "reviewer": "correctness",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.3499,
+      "prompt_tokens": 576,
+      "completion_tokens": 306,
+      "error": null,
+      "findings": [
+        {
+          "path": "app/cache.py",
+          "line": 13,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `put` has no test in this change",
+          "justification": "`put` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.312,
+          "suggestion": "Add a unit test covering `put`'s expected result and one edge case.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        },
+        {
+          "path": "app/cache.py",
+          "line": 14,
+          "severity": "high",
+          "category": "bug",
+          "title": "Lock acquired without a guaranteed release",
+          "justification": "If the guarded block raises, `.release()` is never reached and every other thread blocks on that lock forever: a deadlock.",
+          "confidence": 0.778,
+          "suggestion": "Use the lock as a context manager (`with lock:`) or try/finally.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        },
+        {
+          "path": "app/cache.py",
+          "line": 25,
+          "severity": "medium",
+          "category": "bug",
+          "title": "`assert` used for runtime validation is stripped under -O",
+          "justification": "Running Python with -O removes assert statements entirely, so this check silently disappears in optimised deployments.",
+          "confidence": 0.594,
+          "suggestion": "Raise an explicit exception instead.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        }
+      ]
+    },
+    {
+      "path": "app/cache.py",
+      "reviewer": "performance",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.343,
+      "prompt_tokens": 576,
+      "completion_tokens": 121,
+      "error": null,
+      "findings": [
+        {
+          "path": "app/cache.py",
+          "line": 13,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `put` has no test in this change",
+          "justification": "`put` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.312,
+          "suggestion": "Add a unit test covering `put`'s expected result and one edge case.",
+          "reviewer": "performance",
+          "agreed_by": []
+        }
+      ]
+    },
+    {
+      "path": "app/cache.py",
+      "reviewer": "tests",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.1635,
+      "prompt_tokens": 576,
+      "completion_tokens": 316,
+      "error": null,
+      "findings": [
+        {
+          "path": "app/cache.py",
+          "line": 13,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `put` has no test in this change",
+          "justification": "`put` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.562,
+          "suggestion": "Add a unit test covering `put`'s expected result and one edge case.",
+          "reviewer": "tests",
+          "agreed_by": []
+        },
+        {
+          "path": "app/cache.py",
+          "line": 19,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `get` has no test in this change",
+          "justification": "`get` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.562,
+          "suggestion": "Add a unit test covering `get`'s expected result and one edge case.",
+          "reviewer": "tests",
+          "agreed_by": []
+        },
+        {
+          "path": "app/cache.py",
+          "line": 30,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `warm` has no test in this change",
+          "justification": "`warm` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.562,
+          "suggestion": "Add a unit test covering `warm`'s expected result and one edge case.",
+          "reviewer": "tests",
+          "agreed_by": []
+        }
+      ]
+    },
+    {
+      "path": "app/exporter.py",
+      "reviewer": "correctness",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.2887,
+      "prompt_tokens": 404,
+      "completion_tokens": 404,
+      "error": null,
+      "findings": [
+        {
+          "path": "app/exporter.py",
+          "line": 7,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `export_csv` has no test in this change",
+          "justification": "`export_csv` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.312,
+          "suggestion": "Add a unit test covering `export_csv`'s expected result and one edge case.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        },
+        {
+          "path": "app/exporter.py",
+          "line": 8,
+          "severity": "medium",
+          "category": "bug",
+          "title": "File opened without a context manager may leak the handle",
+          "justification": "Without `with`, an exception before `.close()` leaves the descriptor open until the garbage collector runs.",
+          "confidence": 0.648,
+          "suggestion": "Wrap it in `with open(...) as fh:`.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        },
+        {
+          "path": "app/exporter.py",
+          "line": 14,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `archive` has no test in this change",
+          "justification": "`archive` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.312,
+          "suggestion": "Add a unit test covering `archive`'s expected result and one edge case.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        },
+        {
+          "path": "app/exporter.py",
+          "line": 16,
+          "severity": "high",
+          "category": "bug",
+          "title": "`shell=True` enables shell injection",
+          "justification": "With shell=True the command string is interpreted by the shell, so any interpolated value can inject further commands.",
+          "confidence": 0.907,
+          "suggestion": "Pass a list of arguments and leave shell=False.",
+          "reviewer": "correctness",
+          "agreed_by": []
+        }
+      ]
+    },
+    {
+      "path": "app/exporter.py",
+      "reviewer": "performance",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.388,
+      "prompt_tokens": 404,
+      "completion_tokens": 228,
+      "error": null,
+      "findings": [
+        {
+          "path": "app/exporter.py",
+          "line": 7,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `export_csv` has no test in this change",
+          "justification": "`export_csv` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.312,
+          "suggestion": "Add a unit test covering `export_csv`'s expected result and one edge case.",
+          "reviewer": "performance",
+          "agreed_by": []
+        },
+        {
+          "path": "app/exporter.py",
+          "line": 14,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `archive` has no test in this change",
+          "justification": "`archive` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.312,
+          "suggestion": "Add a unit test covering `archive`'s expected result and one edge case.",
+          "reviewer": "performance",
+          "agreed_by": []
+        }
+      ]
+    },
+    {
+      "path": "app/exporter.py",
+      "reviewer": "tests",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.397,
+      "prompt_tokens": 404,
+      "completion_tokens": 404,
+      "error": null,
+      "findings": [
+        {
+          "path": "app/exporter.py",
+          "line": 7,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `export_csv` has no test in this change",
+          "justification": "`export_csv` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.562,
+          "suggestion": "Add a unit test covering `export_csv`'s expected result and one edge case.",
+          "reviewer": "tests",
+          "agreed_by": []
+        },
+        {
+          "path": "app/exporter.py",
+          "line": 8,
+          "severity": "medium",
+          "category": "bug",
+          "title": "File opened without a context manager may leak the handle",
+          "justification": "Without `with`, an exception before `.close()` leaves the descriptor open until the garbage collector runs.",
+          "confidence": 0.36,
+          "suggestion": "Wrap it in `with open(...) as fh:`.",
+          "reviewer": "tests",
+          "agreed_by": []
+        },
+        {
+          "path": "app/exporter.py",
+          "line": 14,
+          "severity": "medium",
+          "category": "test",
+          "title": "New public function `archive` has no test in this change",
+          "justification": "`archive` is introduced by this PR and no test file in the same change references it, so the new behaviour is unverified.",
+          "confidence": 0.562,
+          "suggestion": "Add a unit test covering `archive`'s expected result and one edge case.",
+          "reviewer": "tests",
+          "agreed_by": []
+        },
+        {
+          "path": "app/exporter.py",
+          "line": 16,
+          "severity": "high",
+          "category": "bug",
+          "title": "`shell=True` enables shell injection",
+          "justification": "With shell=True the command string is interpreted by the shell, so any interpolated value can inject further commands.",
+          "confidence": 0.504,
+          "suggestion": "Pass a list of arguments and leave shell=False.",
+          "reviewer": "tests",
+          "agreed_by": []
+        }
+      ]
+    },
+    {
+      "path": "tests/test_cache.py",
+      "reviewer": "correctness",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.389,
+      "prompt_tokens": 206,
+      "completion_tokens": 64,
+      "error": null,
+      "findings": []
+    },
+    {
+      "path": "tests/test_cache.py",
+      "reviewer": "performance",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.2217,
+      "prompt_tokens": 206,
+      "completion_tokens": 64,
+      "error": null,
+      "findings": []
+    },
+    {
+      "path": "tests/test_cache.py",
+      "reviewer": "tests",
+      "steps": 2,
+      "tool_calls": [
+        "get_file_context"
+      ],
+      "latency_s": 0.3223,
+      "prompt_tokens": 206,
+      "completion_tokens": 64,
+      "error": null,
+      "findings": []
+    }
+  ]
+}
