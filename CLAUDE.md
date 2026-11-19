@@ -129,7 +129,8 @@ code-review-agent/
 │   ├── orchestrator.py        # asyncio.gather + Semaphore(3), timeouts, retries
 │   └── publisher.py           # sortie : JSON, Markdown, (option) commentaires GitHub
 ├── bench/
-│   ├── targets/               # cibles de test (Rust, TS, JS) : tags sain/dégradé, labels.jsonl
+│   ├── targets.json           # cibles : dépôt, licence, commit figé
+│   ├── setup_env.py           # clone les cibles dans environment/ (ignoré par Git)
 │   ├── inject_bugs.py         # injection déterministe de bugs / suppression de doc
 │   ├── dataset/               # PR étiquetées (JSONL) : repo, n, constats attendus
 │   ├── run_bench.py           # précision / rappel / F1
@@ -201,7 +202,10 @@ Construire un **environnement dans lequel on peut tester les capacités des agen
 5. L'ensemble forme un banc d'essai **reproductible** : on peut rejouer l'agent sur chaque PR et comparer à la vérité terrain.
 
 ### 7.2 Organisation
-- Les bases de code vivent dans des **dépôts de test dédiés** (ou sous `bench/targets/<nom>/` si légères) — jamais mélangées au code de l'agent. Chaque cible a : un tag `sain`, un tag `dégradé`, et un fichier `labels.jsonl` (vérité terrain : `file`, plage de lignes, `category`, description du bug injecté).
+- **Décision (2026-11-19) : tout se fait en local.** Les cibles sont clonées dans `environment/targets/<nom>/`, dossier **ignoré par Git** (`.gitignore`) : on ne redistribue jamais de code tiers modifié. Seuls sont versionnés : `bench/targets.json` (dépôt, licence, commit figé), `bench/setup_env.py` (clonage reproductible) et, plus tard, le script d'injection et les `labels.jsonl`.
+- **Seules les cibles à licence permissive vérifiée** (MIT, Apache-2.0, BSD) sont admises ; `setup_env.py` refuse les autres. Cibles actuelles : `LittleJS` (JS, MIT), `cJSON` (C, MIT), `tiny2d` (Rust, MIT). `marked` (TS), `lithium` et `teng` (Rust) restent à écarter ou à valider une fois leur licence lue.
+- Chaque cible a : un tag `sain` (commit figé), une branche de travail `travail`, et un fichier `labels.jsonl` (vérité terrain : `file`, plage de lignes, `category`, description du bug injecté). Revenir à l'état sain = `git checkout sain`.
+- Les PR avec bugs ne sont ouvertes que sur nos propres dépôts, et seulement si la licence de la cible le permet.
 - Le script d'injection de bugs est **versionné et déterministe** (on peut régénérer les PR). Les PR de test sont ouvertes **uniquement sur nos propres dépôts**, jamais sur un dépôt tiers sans accord.
 - Chaque bug injecté est documenté (type, difficulté, indice attendu) pour pouvoir calculer le rappel par catégorie et par langage.
 - Ne jamais exécuter le code d'une cible dégradée hors d'un environnement isolé ; l'agent, lui, ne l'exécute jamais (section 5).

@@ -1,0 +1,14 @@
+# Environnement de test local : code tiers (cibles) et variantes dégradées.
+# Jamais versionné : on ne redistribue pas de code tiers modifié (voir CLAUDE.md §7).
+environment/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets
+.env

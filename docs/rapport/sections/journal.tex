@@ -1,4 +1,5 @@
 \section{Journal des changements}
 \begin{description}
   \item[2026-11-19] Cr\'eation de la branche \texttt{chore/maxim-init-projet}, ajout de \texttt{CLAUDE.md} (r\`egles du projet), puis mise \`a jour : environnement de test selon la consigne du professeur et rapport LaTeX continu. Les sources \texttt{.tex} sont livr\'ees ; aucun compilateur LaTeX n'est install\'e, le PDF n'a donc pas \'et\'e g\'en\'er\'e.
+  \item[2026-11-19] Branche 	exttt{feat/environnement-test} : environnement de test \emph{local}. Seules les cibles \`a licence permissive v'erifi'ee sont retenues : LittleJS (JavaScript, MIT), cJSON (C, MIT) et tiny2d (Rust, MIT). Le script 	exttt{bench/setup\_env.py} clone chaque cible \`a un commit fig'e dans 	exttt{environment/} (ignor'e par Git) et pose le tag 	exttt{sain}. Ex'ecut'e et v'erifi'e : les trois clones sont propres et l'op'eration est idempotente. Reste \`a faire : injection de bugs et 'etiquetage.
 \end{description}

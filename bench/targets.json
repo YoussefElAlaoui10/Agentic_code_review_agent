@@ -1,0 +1,29 @@
+[
+  {
+    "name": "littlejs",
+    "repo": "KilledByAPixel/LittleJS",
+    "language": "javascript",
+    "license": "MIT",
+    "sha": "42619bd28010fb50e400686dcd475eccbd053256",
+    "domain": "moteur de jeu 2D/3D HTML5",
+    "code_dirs": ["src"]
+  },
+  {
+    "name": "cjson",
+    "repo": "DaveGamble/cJSON",
+    "language": "c",
+    "license": "MIT",
+    "sha": "6d9f2443ab071f86e5d9b43025a40929ec41c46c",
+    "domain": "analyseur JSON",
+    "code_dirs": ["."]
+  },
+  {
+    "name": "tiny2d",
+    "repo": "trizko/tiny2d",
+    "language": "rust",
+    "license": "MIT",
+    "sha": "eef8e46f74e9ea1ea200deb4df3d4a3bcb04ff55",
+    "domain": "moteur de jeu 2D",
+    "code_dirs": ["src"]
+  }
+]
