@@ -1,0 +1,32 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 320' width='640' height='320' font-family='system-ui,sans-serif'>
+<rect width='100%' height='100%' fill='#ffffff'/>
+<text x='320.0' y='26' text-anchor='middle' font-size='15' font-weight='600' fill='#111'>Speedup vs sequential (4 files x 3 roles)</text>
+<line x1='64' y1='264.0' x2='616' y2='264.0' stroke='#e5e7eb' stroke-width='1'/>
+<text x='56' y='268.0' text-anchor='end' font-size='11' fill='#6b7280'>0.0</text>
+<line x1='64' y1='210.0' x2='616' y2='210.0' stroke='#e5e7eb' stroke-width='1'/>
+<text x='56' y='214.0' text-anchor='end' font-size='11' fill='#6b7280'>3.4</text>
+<line x1='64' y1='156.0' x2='616' y2='156.0' stroke='#e5e7eb' stroke-width='1'/>
+<text x='56' y='160.0' text-anchor='end' font-size='11' fill='#6b7280'>6.9</text>
+<line x1='64' y1='102.0' x2='616' y2='102.0' stroke='#e5e7eb' stroke-width='1'/>
+<text x='56' y='106.0' text-anchor='end' font-size='11' fill='#6b7280'>10.3</text>
+<line x1='64' y1='48.0' x2='616' y2='48.0' stroke='#e5e7eb' stroke-width='1'/>
+<text x='56' y='52.0' text-anchor='end' font-size='11' fill='#6b7280'>13.8</text>
+<text x='14' y='156.0' font-size='11' fill='#6b7280' transform='rotate(-90 14 156.0)' text-anchor='middle'>speedup</text>
+<rect x='88.3' y='248.4' width='61.8' height='15.6' rx='3' fill='#2563eb'/>
+<text x='119.2' y='242.4' text-anchor='middle' font-size='11' fill='#111'>1.00x</text>
+<text x='119.2' y='282.0' text-anchor='middle' font-size='11' fill='#374151'>1</text>
+<rect x='198.7' y='235.0' width='61.8' height='29.0' rx='3' fill='#2563eb'/>
+<text x='229.6' y='229.0' text-anchor='middle' font-size='11' fill='#111'>1.86x</text>
+<text x='229.6' y='282.0' text-anchor='middle' font-size='11' fill='#374151'>2</text>
+<rect x='309.1' y='207.8' width='61.8' height='56.2' rx='3' fill='#2563eb'/>
+<text x='340.0' y='201.8' text-anchor='middle' font-size='11' fill='#111'>3.59x</text>
+<text x='340.0' y='282.0' text-anchor='middle' font-size='11' fill='#374151'>4</text>
+<rect x='419.5' y='171.0' width='61.8' height='93.0' rx='3' fill='#2563eb'/>
+<text x='450.4' y='165.0' text-anchor='middle' font-size='11' fill='#111'>5.94x</text>
+<text x='450.4' y='282.0' text-anchor='middle' font-size='11' fill='#374151'>8</text>
+<rect x='529.9' y='122.8' width='61.8' height='141.2' rx='3' fill='#2563eb'/>
+<text x='560.8' y='116.8' text-anchor='middle' font-size='11' fill='#111'>9.02x</text>
+<text x='560.8' y='282.0' text-anchor='middle' font-size='11' fill='#374151'>12</text>
+<polyline points='119.2,248.3 229.6,232.7 340.0,201.4 450.4,138.8 560.8,76.2' fill='none' stroke='#dc2626' stroke-width='2' stroke-dasharray='5 4'/>
+<text x='616' y='38' text-anchor='end' font-size='11' fill='#dc2626'>ideal (linear)</text>
+</svg>

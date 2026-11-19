@@ -1,0 +1,6 @@
+# No third-party dependencies: prreview uses the Python standard library only.
+# Python >= 3.10 is the single requirement (see pyproject.toml).
+#
+# Optional, for development convenience only -- the test suite runs under
+# `python -m unittest` without them:
+# pytest==8.3.3

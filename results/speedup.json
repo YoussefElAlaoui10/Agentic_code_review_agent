@@ -1,0 +1,176 @@
+{
+  "baseline_s": 5.2223,
+  "files": 4,
+  "roles": [
+    "correctness",
+    "performance",
+    "tests"
+  ],
+  "model": "mock-reviewer",
+  "rows": [
+    {
+      "concurrency": 1,
+      "mode": "sequential",
+      "wall_clock_s": 5.2223,
+      "stdev_s": 0.0005,
+      "sum_task_s": 5.2222,
+      "peak_overlap": 1,
+      "tasks": 12,
+      "findings": 18,
+      "repeats": 3,
+      "speedup": 1.0,
+      "efficiency": 1.0
+    },
+    {
+      "concurrency": 1,
+      "mode": "parallel",
+      "wall_clock_s": 5.2244,
+      "stdev_s": 0.0023,
+      "sum_task_s": 5.2251,
+      "peak_overlap": 1,
+      "tasks": 12,
+      "findings": 18,
+      "repeats": 3,
+      "speedup": 1.0,
+      "efficiency": 1.0
+    },
+    {
+      "concurrency": 2,
+      "mode": "parallel",
+      "wall_clock_s": 2.8148,
+      "stdev_s": 0.0014,
+      "sum_task_s": 5.2212,
+      "peak_overlap": 2,
+      "tasks": 12,
+      "findings": 18,
+      "repeats": 3,
+      "speedup": 1.855,
+      "efficiency": 0.928
+    },
+    {
+      "concurrency": 4,
+      "mode": "parallel",
+      "wall_clock_s": 1.4543,
+      "stdev_s": 0.0005,
+      "sum_task_s": 5.2108,
+      "peak_overlap": 4,
+      "tasks": 12,
+      "findings": 18,
+      "repeats": 3,
+      "speedup": 3.591,
+      "efficiency": 0.898
+    },
+    {
+      "concurrency": 8,
+      "mode": "parallel",
+      "wall_clock_s": 0.8789,
+      "stdev_s": 0.0009,
+      "sum_task_s": 5.2137,
+      "peak_overlap": 8,
+      "tasks": 12,
+      "findings": 18,
+      "repeats": 3,
+      "speedup": 5.942,
+      "efficiency": 0.743
+    },
+    {
+      "concurrency": 12,
+      "mode": "parallel",
+      "wall_clock_s": 0.5787,
+      "stdev_s": 0.0007,
+      "sum_task_s": 5.2165,
+      "peak_overlap": 12,
+      "tasks": 12,
+      "findings": 18,
+      "repeats": 3,
+      "speedup": 9.024,
+      "efficiency": 0.752
+    }
+  ],
+  "timeline": [
+    {
+      "path": "app/cache.py",
+      "role": "performance",
+      "start": 3803.13175,
+      "end": 3803.4461,
+      "ok": true
+    },
+    {
+      "path": "app/cache.py",
+      "role": "tests",
+      "start": 3803.13182,
+      "end": 3803.47477,
+      "ok": true
+    },
+    {
+      "path": "app/exporter.py",
+      "role": "correctness",
+      "start": 3803.13188,
+      "end": 3803.48537,
+      "ok": true
+    },
+    {
+      "path": "tests/test_cache.py",
+      "role": "performance",
+      "start": 3803.13211,
+      "end": 3803.52095,
+      "ok": true
+    },
+    {
+      "path": "app/fetcher.py",
+      "role": "tests",
+      "start": 3803.1316,
+      "end": 3803.5239,
+      "ok": true
+    },
+    {
+      "path": "app/exporter.py",
+      "role": "performance",
+      "start": 3803.13194,
+      "end": 3803.52575,
+      "ok": true
+    },
+    {
+      "path": "app/fetcher.py",
+      "role": "correctness",
+      "start": 3803.13131,
+      "end": 3803.57998,
+      "ok": true
+    },
+    {
+      "path": "app/fetcher.py",
+      "role": "performance",
+      "start": 3803.13151,
+      "end": 3803.58632,
+      "ok": true
+    },
+    {
+      "path": "app/exporter.py",
+      "role": "tests",
+      "start": 3803.13199,
+      "end": 3803.60226,
+      "ok": true
+    },
+    {
+      "path": "tests/test_cache.py",
+      "role": "tests",
+      "start": 3803.13216,
+      "end": 3803.62985,
+      "ok": true
+    },
+    {
+      "path": "app/cache.py",
+      "role": "correctness",
+      "start": 3803.13168,
+      "end": 3803.70786,
+      "ok": true
+    },
+    {
+      "path": "tests/test_cache.py",
+      "role": "correctness",
+      "start": 3803.13206,
+      "end": 3803.71044,
+      "ok": true
+    }
+  ]
+}

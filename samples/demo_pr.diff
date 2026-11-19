@@ -1,0 +1,110 @@
+diff --git a/app/fetcher.py b/app/fetcher.py
+new file mode 100644
+index 0000000..a1b2c3d
+--- /dev/null
++++ b/app/fetcher.py
+@@ -0,0 +1,34 @@
++"""Concurrent feed fetching for the ingestion worker."""
++
++import asyncio
++import json
++import time
++
++import requests
++
++
++async def fetch_feeds(urls, seen=[]):
++    """Fetch every feed and return the parsed payloads."""
++    results = []
++    for url in urls:
++        time.sleep(0.2)
++        response = requests.get(url)
++        if response.status_code == 200:
++            results.append(response.json())
++            seen.append(url)
++    return results
++
++
++async def fetch_one(url, timeout=5):
++    try:
++        response = requests.get(url, timeout=timeout)
++        return response.json()
++    except:
++        return None
++
++
++def parse_rule(expression, row):
++    """Evaluate a user-supplied filter expression against a row."""
++    return eval(expression, {"row": row})
++
++
++def summarise(payloads):
++    return {"count": len(payloads), "first": payloads[0]}
+diff --git a/app/cache.py b/app/cache.py
+index 1111111..2222222 100644
+--- a/app/cache.py
++++ b/app/cache.py
+@@ -10,6 +10,28 @@ class Cache:
+         self._lock = threading.Lock()
+         self._store = {}
+ 
++    def put(self, key, value):
++        self._lock.acquire()
++        self._store[key] = value
++        self._evict_if_needed()
++        self._lock.release()
++
++    def get(self, key):
++        if self._store.get(key) == None:
++            return None
++        return self._store[key]
++
++    def _evict_if_needed(self):
++        assert len(self._store) <= self.max_size
++        while len(self._store) > self.max_size:
++            oldest = sorted(self._store)[0]
++            del self._store[oldest]
++
++    def warm(self, pairs):
++        # TODO: batch this once the backend supports it
++        for key, value in pairs:
++            self.put(key, value)
++
+     def clear(self):
+         self._store.clear()
+diff --git a/app/exporter.py b/app/exporter.py
+index 3333333..4444444 100644
+--- a/app/exporter.py
++++ b/app/exporter.py
+@@ -4,6 +4,19 @@ import subprocess
+ 
+ 
+ class Exporter:
++    def export_csv(self, rows, path):
++        handle = open(path, "w")
++        for row in rows:
++            handle.write(",".join(str(c) for c in row) + "\n")
++        handle.close()
++        print("exported", len(rows), "rows")
++
++    def archive(self, path, destination):
++        command = "tar czf " + destination + " " + path
++        subprocess.run(command, shell=True)
++
+     def export_json(self, rows, path):
+         with open(path, "w") as fh:
+             json.dump(rows, fh)
+diff --git a/tests/test_cache.py b/tests/test_cache.py
+index 5555555..6666666 100644
+--- a/tests/test_cache.py
++++ b/tests/test_cache.py
+@@ -8,3 +8,9 @@ def test_cache_clear():
+     cache.clear()
+     assert cache.get("a") is None
+ 
++
++def test_cache_put_and_get():
++    cache = Cache(max_size=4)
++    cache.put("a", 1)
++    assert cache.get("a") == 1
++

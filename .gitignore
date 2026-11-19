@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+
+# Generated measurement artefacts are reproducible with `make bench`;
+# the ones quoted in the report are committed under results/ on purpose.
+results/*.tmp
