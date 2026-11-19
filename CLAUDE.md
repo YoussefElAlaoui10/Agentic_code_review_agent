@@ -12,8 +12,10 @@ Points durs du projet :
 
 ### Livrables
 1. **CLI** (et/ou serveur MCP) : récupère une PR, analyse le diff fichier par fichier, émet les constats.
-2. **(Optionnel) Benchmark** : précision / rappel / F1 sur 10–20 PR étiquetées (bugs connus, tests manquants).
-3. **Comparaison courte** avec une revue humaine (`docs/comparaison-humaine.md`).
+2. **Environnement de test des agents** (consigne du professeur, section 7) : 2–3 bases de code de langages et domaines différents, dans lesquelles on injecte des bugs et on ouvre des PR, pour mesurer les capacités de l'agent.
+3. **(Optionnel) Benchmark** : précision / rappel / F1 sur 10–20 PR étiquetées (bugs connus, tests manquants).
+4. **Comparaison courte** avec une revue humaine (`docs/comparaison-humaine.md`).
+5. **Rapport LaTeX** tenu à jour en continu (section 11).
 
 ### Références
 - GitHub Copilot code review, Qodo / PR-Agent (Apache 2.0), CodeRabbit.
@@ -127,11 +129,14 @@ code-review-agent/
 │   ├── orchestrator.py        # asyncio.gather + Semaphore(3), timeouts, retries
 │   └── publisher.py           # sortie : JSON, Markdown, (option) commentaires GitHub
 ├── bench/
+│   ├── targets/               # cibles de test (Rust, TS, JS) : tags sain/dégradé, labels.jsonl
+│   ├── inject_bugs.py         # injection déterministe de bugs / suppression de doc
 │   ├── dataset/               # PR étiquetées (JSONL) : repo, n, constats attendus
 │   ├── run_bench.py           # précision / rappel / F1
 │   └── README.md
 ├── tests/
 └── docs/
+    ├── rapport/               # rapport LaTeX continu (main.tex + sections/)
     ├── decisions/
     └── comparaison-humaine.md
 ```
@@ -185,13 +190,28 @@ Créer ces fichiers dans `.claude/agents/` (sous-agents) et `.claude/skills/<nom
 - `Reviewer` (un par fichier, en parallèle) et `Judge` (un seul, en fin de chaîne) décrits en section 5. Leurs prompts vivent dans `src/revue/agents/prompts/`.
 - Possibilité d'ajouter des reviewers spécialisés (sécurité, tests, perf) qui tournent en parallèle sur le même fichier ; le juge arbitre leurs sorties.
 
-## 7. Benchmark
+## 7. Environnement de test et benchmark
 
-- Jeu de **10–20 PR** étiquetées (idéalement dont des PR de `dask/dask`) : bugs connus (corrigés ensuite), tests manquants, faux positifs piégeux.
+### 7.1 Consigne du professeur (à respecter)
+Construire un **environnement dans lequel on peut tester les capacités des agents** de revue :
+1. Choisir **2 ou 3 bases de code** de **langages différents** (au moins : Rust, TypeScript, JavaScript) et de **projets différents** (ex. moteur de jeu vidéo, outil CLI, bibliothèque web…). Taille **raisonnable**, bien **structurée**, avec **README** et documentation.
+2. Pour chaque base : prendre un projet **fait rapidement**, puis pouvoir **revenir à l'état antérieur** (tags / commits de référence « sain »).
+3. Créer des variantes **dégradées** : **supprimer la documentation** et **faire des « trous »** (code retiré, comportement cassé) qui **empêchent le projet de fonctionner** ou y introduisent des bugs.
+4. Ouvrir des **PR contenant ces bugs** (une PR = un ou plusieurs bugs connus, étiquetés) que l'agent devra détecter.
+5. L'ensemble forme un banc d'essai **reproductible** : on peut rejouer l'agent sur chaque PR et comparer à la vérité terrain.
+
+### 7.2 Organisation
+- Les bases de code vivent dans des **dépôts de test dédiés** (ou sous `bench/targets/<nom>/` si légères) — jamais mélangées au code de l'agent. Chaque cible a : un tag `sain`, un tag `dégradé`, et un fichier `labels.jsonl` (vérité terrain : `file`, plage de lignes, `category`, description du bug injecté).
+- Le script d'injection de bugs est **versionné et déterministe** (on peut régénérer les PR). Les PR de test sont ouvertes **uniquement sur nos propres dépôts**, jamais sur un dépôt tiers sans accord.
+- Chaque bug injecté est documenté (type, difficulté, indice attendu) pour pouvoir calculer le rappel par catégorie et par langage.
+- Ne jamais exécuter le code d'une cible dégradée hors d'un environnement isolé ; l'agent, lui, ne l'exécute jamais (section 5).
+
+### 7.3 Jeu de PR et métriques
+- Jeu de **10–20 PR** étiquetées : bugs injectés, tests manquants, **faux positifs piégeux** (changements sains d'apparence suspecte). Peut inclure des PR réelles (ex. `dask/dask`) en complément.
 - Étiquette = `(file, plage de lignes, category)` ; un constat prédit est un **vrai positif** s'il recouvre une étiquette de même catégorie.
-- Métriques : **précision, rappel, F1**, globales et par catégorie ; coût (tokens) et latence par PR.
-- Comparer : (a) reviewers seuls, (b) reviewers + juge, (c) revue humaine d'origine (commentaires de la PR). Documenter honnêtement les limites (petit échantillon, étiquetage subjectif).
-- Les résultats vont dans `bench/results/AAAA-MM-JJ.json` + résumé Markdown. Ne jamais « ajuster » les étiquettes pour améliorer le score.
+- Métriques : **précision, rappel, F1**, globales, par catégorie et par langage ; coût (tokens) et latence par PR.
+- Comparer : (a) reviewers seuls, (b) reviewers + juge, (c) revue humaine d'origine quand elle existe. Documenter honnêtement les limites (petit échantillon, étiquetage subjectif).
+- Résultats dans `bench/results/AAAA-MM-JJ.json` + résumé Markdown. Ne jamais « ajuster » les étiquettes pour améliorer le score.
 
 ## 8. Commandes utiles
 
@@ -222,3 +242,14 @@ python bench/run_bench.py --dataset bench/dataset/prs.jsonl
 - [ ] Documentation et README à jour, en français.
 - [ ] Aucun secret dans le diff.
 - [ ] Description de PR claire (contexte, changements, tests, limites).
+- [ ] Rapport LaTeX (`docs/rapport/`) mis à jour avec une entrée de journal (section 11).
+
+## 11. Rapport LaTeX continu (consigne de l'utilisateur)
+
+À **chaque changement significatif**, mettre à jour en parallèle un **rapport LaTeX** dans `docs/rapport/`, laissé « de côté » : il sert de **résumé de tout ce qui a été fait** à la fin du projet.
+
+- Structure : `docs/rapport/main.tex` + une section par thème dans `docs/rapport/sections/` (contexte, architecture, environnement de test, agents, résultats, limites, journal).
+- Une entrée courte et datée dans `sections/journal.tex` par changement : quoi, pourquoi, branche/PR, résultat des tests. Pas d'invention : on ne consigne que ce qui a été réellement fait et exécuté.
+- Le rapport est en **français**, versionné dans Git, et mis à jour **dans le même commit ou la même PR** que le changement concerné.
+- Ne jamais y mettre de secrets. Les résultats de benchmark cités doivent provenir de vrais runs (`bench/results/`).
+- Si aucun compilateur LaTeX n'est installé, ne pas prétendre que le PDF a été généré : livrer les sources `.tex` et le signaler.
